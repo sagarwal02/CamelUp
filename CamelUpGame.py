@@ -95,6 +95,29 @@ class CamelUpGame:
         '''
         curr_player = 0
         while not self.board.is_leg_finished():
+            if self.board.track[15]:
+                break
+            player = self.players[curr_player]
+            move = self.get_player_move(player)
+            match move:
+                case "r":
+                    rolled_die = self.board.shake_pyramid()
+                    self.board.move_camel(rolled_die)
+                    player.win_money(1)
+                case "b":
+                    ticket_color = self.get_player_bet(player)
+                    ticket = self.board.place_bet(ticket_color)
+                    player.add_bet(ticket)
+            self.board.print(self.players)
+            curr_player = (curr_player + 1) % 2
+    def play_2_leg(self):
+        '''Alternatingly prompts each player to either Bet or Roll until all dice have been 
+           placed on Dice Tents
+        '''
+        curr_player = 1
+        while not self.board.is_leg_finished():
+            if self.board.track[15]:
+                break
             player = self.players[curr_player]
             move = self.get_player_move(player)
             match move:
@@ -124,11 +147,26 @@ class CamelUpGame:
                 else:
                     player.pay_money(1) #second -> lose $1
 
+    def reset(self):
+        self.players[0].reset_tickets()
+        self.players[1].reset_tickets()
+        self.board.reset_tents()
+        self.board.pyramid = set(self.board.camel_colors)
+        
 if __name__ == "__main__":
     # TODO: enter player names
     camelup = CamelUpGame("p1", "p2")
     camelup.board.print(camelup.players)
-    camelup.play_1_leg()
-    camelup.leg_payouts_and_results()
+    while not camelup.board.track[-1]:
+        camelup.play_1_leg()
+        camelup.leg_payouts_and_results()
+        camelup.reset()
+        camelup.play_2_leg()
+        camelup.leg_payouts_and_results()
+        camelup.reset()
+        
     for player in camelup.players:
         print(f"{player.name} ended the leg with {player.money} coins.")
+
+
+    

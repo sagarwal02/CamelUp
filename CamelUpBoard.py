@@ -130,13 +130,12 @@ class CamelUpBoard:
         if not die[0]:
             return self.track
         index = [i for i, pair in enumerate(self.track) if die[0] in pair][0]
-        self.track[index+die[1]].extend(self.track[index][self.track[index].index(die[0]):])
+        self.track[min(15, index+die[1])].extend(self.track[index][self.track[index].index(die[0]):])
         self.track[index] = self.track[index][0:self.track[index].index(die[0])]
         
         ### END SOLUTION
         if verbose: print("Updated track state:", self.track)
         return self.track
-    
     def shake_pyramid(self)->tuple[str, int]:
         '''Manages all the steps (from the board persepctive) involved with shaking the pyramid, 
            which includes:
@@ -302,10 +301,13 @@ class CamelUpBoard:
         copy_pyramid = copy.deepcopy(self.pyramid)
         for i in range(trials):
             self.track = copy.deepcopy(copy_track)
-            self.pyramid = copy.deepcopy(copy_pyramid)
-            while len(self.pyramid) > 0:
-                roll = self.shake_pyramid()
-                self.move_camel(roll)
+            pyramid = copy.deepcopy(copy_pyramid)
+            while len(pyramid) > 0:
+                 # roll = self.shake_pyramid()
+                 die = random.sample(pyramid, 1)[0]
+                 roll = random.randint(1,3)
+                 pyramid.remove(die)
+                 self.move_camel((die, roll))
             win_percents[self.get_rankings()[0]] = (win_percents[self.get_rankings()[0]][0]+1, win_percents[self.get_rankings()[0]][1])
             win_percents[self.get_rankings()[1]] = (win_percents[self.get_rankings()[1]][0], win_percents[self.get_rankings()[1]][1]+1)
             
